@@ -77,6 +77,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     name: "Signup",
     data() {
@@ -106,12 +108,22 @@ export default {
         signupAccount: function () {
             // to nothing
             console.log('clicked')
+            axios.post('http://localhost:8000/api/v1/register', {
+                name: this.signup.name,
+                email: this.signup.email,
+                association: this.signup.association,
+                password: this.signup.password,
+            }).then(response => {
+                console.log(response)
+            }).catch(e => {
+                console.log(e)
+            });
         }
     },
     watch: {
         signup: {
             handler(input) {
-                if (input.password.length > 0 && input.password.length < 9) {
+                if (input.password.length > 0 && input.password.length < 10) {
                     this.validation.error.password = "Weak password";
                     this.validation.requirements.password = "Password needs more than 10 characters";
                 } else {
