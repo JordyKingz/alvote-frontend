@@ -1,1 +1,7 @@
-{"version":3,"sourceRoot":"","sources":["style.scss"],"names":[],"mappings":"AAAA,eACA,qBACA","file":"style.min.css"}
+{
+"version": 3,
+"mappings": "AAAA,cAAc,CACd,oBAAoB,CACpB,mBAAmB,CAEnB,KAAM,CACF,gBAAgB,CAAE,OAAO",
+"sources": ["style.scss"],
+"names": [],
+"file": "style.min.css"
+}
