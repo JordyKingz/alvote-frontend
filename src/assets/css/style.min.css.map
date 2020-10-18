@@ -1,7 +1,7 @@
 {
 "version": 3,
-"mappings": "AAAA,cAAc,CACd,oBAAoB,CACpB,mBAAmB,CAEnB,KAAM,CACF,gBAAgB,CAAE,OAAO",
-"sources": ["style.scss"],
+"mappings": "AAAA,cAAc,CACd,oBAAoB,CACpB,mBAAmB,CCDf,4BAAoB,CAChB,gBAAgB,CCFV,OAAO,CFOrB,KAAM,CACF,gBAAgB,CAAE,OAAO",
+"sources": ["style.scss","sidebar.scss","variables.scss"],
 "names": [],
 "file": "style.min.css"
 }

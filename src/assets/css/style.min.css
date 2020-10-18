@@ -1,2 +1,2 @@
-@tailwind base;@tailwind components;@tailwind utilities;input{background-color:#ffffff}
+@tailwind base;@tailwind components;@tailwind utilities;#sidebar .router-link-active{background-color:#1a202c}input{background-color:#ffffff}
 /*# sourceMappingURL=style.min.css.map */

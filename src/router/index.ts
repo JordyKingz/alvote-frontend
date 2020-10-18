@@ -5,12 +5,18 @@ import Signup from '../views/association/auth/Signup.vue'
 import Signin from '../views/association/auth/Signin.vue'
 import Confirmation from '../views/association/auth/ConfirmAccount.vue'
 import Dashboard from '../views/association/cp/Dashboard.vue'
+import Rooms from '../views/association/cp/Rooms.vue'
 
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
   {
     path: '/',
+    name: 'landing',
+    redirect: { name: 'signin'}
+  },
+  {
+    path: '/sign-up',
     name: 'signup',
     component: Signup
   },
@@ -28,6 +34,11 @@ const routes: Array<RouteConfig> = [
     path: '/cp/dashboard',
     name: 'association.dashboard',
     component: Dashboard
+  },
+  {
+    path: '/cp/rooms',
+    name: 'association.rooms',
+    component: Rooms
   },
 ]
 

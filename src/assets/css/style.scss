@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'variables';
+@import 'sidebar';
+
 input {
     background-color: #ffffff;
 }
