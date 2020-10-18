@@ -61,16 +61,23 @@
                 </p>
             </div>
             <div class="flex items-center justify-between">
-                <button 
+                <button v-if="formInvalid"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline opacity-50 cursor-not-allowed" 
+                    type="button"
+                    :disabled="formInvalid">
+                    Sign Up
+                </button>
+                <button v-else
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" 
                     type="button"
-                    :disabled="formInvalid"
                     v-on:click="signupAccount">
                     Sign Up
                 </button>
-                <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
-                Already an account?
-                </a>
+                <router-link
+                    :to="{ name: 'signin' }"
+                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
+                    Already an account?
+                </router-link>
             </div>
         </form>
     </div>
@@ -80,43 +87,52 @@
 import axios from 'axios';
 
 export default {
-    name: "Signup",
+    name: "signup",
     data() {
         return {
-        signup: {
-            name: "",
-            email: "",
-            association: "",
-            password: "",
-        },
-        formInvalid: true,
-        validation: {
-            error: {
-                password: ""
+            signup: {
+                name: "",
+                email: "",
+                association: "",
+                password: "",
             },
-            requirements: {
-                password: ""
+            formInvalid: true,
+            validation: {
+                error: {
+                    password: ""
+                },
+                requirements: {
+                    password: ""
+                }
+            },
+            notification: {
+                success: false,
+                warning: false,
+                danger: false,
+                title: "",
+                message: ""
             }
-        }
         };
-    },
-    mounted() {
-        console.log("mounted")
-        console.log(this.signup)
     },
     methods: {
         signupAccount: function () {
-            // to nothing
-            console.log('clicked')
             axios.post('http://localhost:8000/api/v1/register', {
                 name: this.signup.name,
                 email: this.signup.email,
                 association: this.signup.association,
                 password: this.signup.password,
             }).then(response => {
-                console.log(response)
+                this.notification.success = true;
+                this.notification.title = "Account created.";
+                this.notification.message = "Your account is created. Before you can sign in you need to activate your account. Please check your email.";
             }).catch(e => {
-                console.log(e)
+                if (e.request.response != "") {
+                    const message = JSON.parse(e.request.response);
+                    this.notification.success = false;
+                    this.notification.danger = true;
+                    this.notification.title = "Something went wrong.";
+                    this.notification.message = message.message;
+                }
             });
         }
     },
