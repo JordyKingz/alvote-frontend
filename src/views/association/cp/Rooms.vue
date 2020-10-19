@@ -70,12 +70,12 @@ export default {
     },
     methods: {
       create() {
-        console.log(this.room);
-        const token = localStorage.getItem('bearer');
+        console.log(localStorage.getItem("bearer"))
         axios
           .post('http://localhost:8000/api/v1/room/create', {
             headers: {
-              Authorization: 'Bearer ' + token
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("bearer"),
             },
             params: {
               name: this.room.name
