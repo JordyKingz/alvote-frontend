@@ -55,7 +55,7 @@ import axios from 'axios';
 import Alert from '@/components/alert/Alert.vue'
 
 export default {
-    name: "signup",
+    name: 'signup',
     components: {
         Alert,
     },
@@ -80,12 +80,14 @@ export default {
                 danger: false,
                 title: "",
                 message: ""
-            }
+            },
+            params: this.$route.params,
         };
     },
     mounted () {
-        if (this.notification.notification != undefined)
-            this.notification = this.notification.notification
+      console.log(this.params)
+        if (this.params.notification != undefined)
+            this.notification = this.params.notification
     },
     methods: {
         signinAccount: function () {

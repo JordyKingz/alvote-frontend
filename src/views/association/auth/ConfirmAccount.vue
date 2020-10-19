@@ -29,7 +29,7 @@ export default {
                 this.notification.title = "Account activated.";
                 this.notification.message = "Your account has been activated, you can now sign in.";
                 
-                this.$router.push({ name: 'Signin', params: { notification: this.notification}});
+                this.$router.push({ name: 'signin', params: { notification: this.notification}});
             }
         }).catch(e => {
             if (e.request.status === 400) {
@@ -39,7 +39,7 @@ export default {
                 this.notification.title = "Something went wrong.";
                 this.notification.message = message.message;
                 
-                this.$router.push({ name: 'Signin', params: { notification: this.notification}});
+                this.$router.push({ name: 'signin', params: { notification: this.notification}});
             }
         });
     }
