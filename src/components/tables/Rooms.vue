@@ -22,12 +22,12 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr>
+              <tr v-for="(room, key) in rooms" :key="key">
                 <td class="px-6 py-4 whitespace-no-wrap">
                   <div class="flex items-center">
                     <div class="ml-4">
                       <div class="text-sm leading-5 font-medium text-gray-900">
-                        ALV oktober
+                        {{ room.name }}
                       </div>
                       <div class="text-sm leading-5 text-gray-500">
                         KIC
@@ -36,21 +36,27 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-no-wrap">
-                  <div class="text-sm leading-5 text-gray-900">S83FwreGe</div>
+                  <div class="text-sm leading-5 text-gray-900">{{ room.join_code }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-no-wrap">
-                  <div class="text-sm leading-5 text-gray-900">24</div>
+                  <div class="text-sm leading-5 text-gray-900"></div>
                 </td>
                 <td class="px-6 py-4 whitespace-no-wrap">
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                  <span v-if="room.status == 0" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                    Created
+                  </span>
+                  <span v-if="room.status == 1" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                     Active
+                  </span>
+                  <span v-if="room.status == 2" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    Closed
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
                   <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                 </td>
               </tr>
-              <tr>
+              <!-- <tr>
                 <td class="px-6 py-4 whitespace-no-wrap">
                   <div class="flex items-center">
                     <div class="ml-4">
@@ -80,7 +86,7 @@
                 <td class="px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
                   <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                 </td>
-              </tr>
+              </tr> -->
               <!-- More rows... -->
             </tbody>
           </table>
@@ -92,7 +98,10 @@
 
 <script>
 export default {
-
+  name: 'component.tables.rooms',
+  props: {
+    rooms: Array,
+  }
 }
 </script>
 

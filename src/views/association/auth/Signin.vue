@@ -85,7 +85,6 @@ export default {
         };
     },
     mounted () {
-      console.log(this.params)
         if (this.params.notification != undefined)
             this.notification = this.params.notification
     },

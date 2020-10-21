@@ -3,13 +3,14 @@
         <div class="h-screen flex overflow-hidden bg-gray-100">
             <Sidebar :name="name"/>
             <div class="flex flex-col w-0 flex-1 overflow-hidden">
+                <Alert :notification="notification"/>
                 <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3">
-                <button class="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:bg-gray-200 transition ease-in-out duration-150" aria-label="Open sidebar">
-                    <!-- Heroicon name: menu -->
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+                    <button class="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:bg-gray-200 transition ease-in-out duration-150" aria-label="Open sidebar">
+                        <!-- Heroicon name: menu -->
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
                 </div>
                 <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none" tabindex="0">
                     <div class="pt-2 pb-6 md:py-6">
@@ -29,8 +30,8 @@
                           </div>
                         </div>
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                            <Rooms class="mt-5" />
-
+                            <Rooms v-if="rooms.length > 0" class="mt-5" :rooms="rooms"/>
+                            
                             <CreateRoom 
                               v-show="createRoom"
                               :room="room"
@@ -47,6 +48,7 @@
 <script>
 import axios from 'axios';
 
+import Alert from '@/components/alert/Alert.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import Rooms from '@/components/tables/Rooms.vue'
 import CreateRoom from '@/components/forms/create/Room.vue'
@@ -54,6 +56,7 @@ import CreateRoom from '@/components/forms/create/Room.vue'
 export default {
     name: 'association.room',
     components: {
+        Alert,
         Sidebar,
         Rooms,
         CreateRoom
@@ -65,30 +68,72 @@ export default {
             room: {
               name: ''
             },
+            rooms: [],
             createRoom: false,
+            notification: {
+                success: false,
+                warning: false,
+                danger: false,
+                title: "",
+                message: ""
+            },
         };
     },
+    created() {
+        this.fetchData();
+    },
     methods: {
-      create() {
-        console.log(localStorage.getItem("bearer"))
-        axios
-          .post('http://localhost:8000/api/v1/room/create', {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + localStorage.getItem("bearer"),
-            },
-            params: {
-              name: this.room.name
+        fetchData() {
+            axios.get('http://localhost:8000/api/v1/room/get', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                },
+            }).then(response => {
+                this.rooms = response.data.rooms
+                if (this.rooms.length < 1) {
+                    this.notification.warning = true
+                    this.notification.title = "No rooms found."
+                    this.notification.message = "you don't have any rooms yet. Create one."
+                } else {
+                    this.notification.warning = false
+                }
+            }).catch(e => {
+                if (e.request.response != "") {
+                    const message = JSON.parse(e.request.response);
+                    this.notification.success = false;
+                    this.notification.danger = true;
+                    this.notification.title = "Something went wrong.";
+                    this.notification.message = message.message;
+                }
+            });
+        },
+        create() {
+            const room = {
+                name: this.room.name
             }
-          }).then(response => {
-            console.log(response)
-          }).catch(e => {
-            console.log(e.request)
-          });
-      },
-      toggleModal() {
-        this.createRoom = !this.createRoom;
-      }
+
+            axios.post('http://localhost:8000/api/v1/room/create', room, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                },
+            }).then(response => {
+                this.fetchData();
+                this.toggleModal();
+            }).catch(e => {
+                if (e.request.response != "") {
+                    const message = JSON.parse(e.request.response);
+                    this.notification.success = false;
+                    this.notification.danger = true;
+                    this.notification.title = "Something went wrong.";
+                    this.notification.message = message.message;
+                }
+            });
+        },
+        toggleModal() {
+            this.createRoom = !this.createRoom;
+        }
     },
 }
 </script>
