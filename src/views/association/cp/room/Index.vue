@@ -29,8 +29,14 @@
                             </span>
                           </div>
                         </div>
-                        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                            <Rooms v-if="rooms.length > 0" class="mt-5" :rooms="rooms"/>
+                        <div class="mt-5 max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                            <Rooms 
+                              v-if="rooms.length > 0" 
+                              class="mt-5" 
+                              :association="association"
+                              :rooms="rooms"
+                              @openRoom="openRoom"
+                              @deleteRoom="deleteRoom"/>
                             
                             <CreateRoom 
                               v-show="createRoom"
@@ -68,6 +74,9 @@ export default {
             room: {
               name: ''
             },
+            association: {
+              name: ''
+            },
             rooms: [],
             createRoom: false,
             notification: {
@@ -91,6 +100,7 @@ export default {
                 },
             }).then(response => {
                 this.rooms = response.data.rooms
+                this.association = response.data.association
                 if (this.rooms.length < 1) {
                     this.notification.warning = true
                     this.notification.title = "No rooms found."
@@ -121,6 +131,32 @@ export default {
             }).then(response => {
                 this.fetchData();
                 this.toggleModal();
+            }).catch(e => {
+                if (e.request.response != "") {
+                    const message = JSON.parse(e.request.response);
+                    this.notification.success = false;
+                    this.notification.danger = true;
+                    this.notification.title = "Something went wrong.";
+                    this.notification.message = message.message;
+                }
+            });
+        },
+        openRoom (id) {
+          this.$router.push({ 
+            name: 'association.show.room', 
+            params: {
+              id: id,
+            } 
+          })
+        },
+        deleteRoom (id) {
+            axios.delete('http://localhost:8000/api/v1/room/delete/' + id, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                },
+            }).then(response => {
+                this.fetchData();
             }).catch(e => {
                 if (e.request.response != "") {
                     const message = JSON.parse(e.request.response);

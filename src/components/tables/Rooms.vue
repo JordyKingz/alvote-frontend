@@ -25,12 +25,12 @@
               <tr v-for="(room, key) in rooms" :key="key">
                 <td class="px-6 py-4 whitespace-no-wrap">
                   <div class="flex items-center">
-                    <div class="ml-4">
+                    <div class="ml-4 room-link" v-on:click="openRoom(room.id)">
                       <div class="text-sm leading-5 font-medium text-gray-900">
                         {{ room.name }}
                       </div>
                       <div class="text-sm leading-5 text-gray-500">
-                        KIC
+                        {{ association.name }}
                       </div>
                     </div>
                   </div>
@@ -46,48 +46,16 @@
                     Created
                   </span>
                   <span v-if="room.status == 1" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Active
+                    Open
                   </span>
                   <span v-if="room.status == 2" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                     Closed
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
-                  <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                  <a v-on:click="deleteRoom(room.id)" href="#" class="text-red-600 hover:text-red-900">Delete</a>
                 </td>
               </tr>
-              <!-- <tr>
-                <td class="px-6 py-4 whitespace-no-wrap">
-                  <div class="flex items-center">
-                    <div class="ml-4">
-                      <div class="text-sm leading-5 font-medium text-gray-900">
-                        ALV oktober
-                      </div>
-                      <div class="text-sm leading-5 text-gray-500">
-                        KIC
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-no-wrap">
-                  <div class="text-sm leading-5 text-gray-900">S83FwreGe</div>
-                </td>
-                <td class="px-6 py-4 whitespace-no-wrap">
-                  <div class="text-sm leading-5 text-gray-900">24</div>
-                </td>
-                <td class="px-6 py-4 whitespace-no-wrap">
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                    Closed
-                  </span>
-                  <div class="text-sm leading-5 text-gray-500">
-                    19-10-2020
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
-                  <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                </td>
-              </tr> -->
-              <!-- More rows... -->
             </tbody>
           </table>
         </div>
@@ -101,10 +69,21 @@ export default {
   name: 'component.tables.rooms',
   props: {
     rooms: Array,
+    association: Object,
+  },
+  methods: {
+    openRoom(id) {
+      this.$emit('openRoom', id);
+    },
+    deleteRoom(id) {
+      this.$emit('deleteRoom', id);
+    }
   }
 }
 </script>
 
 <style>
-
+.room-link:hover {
+  cursor: pointer;
+}
 </style>
