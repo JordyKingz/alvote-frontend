@@ -52,7 +52,12 @@ const routes: Array<RouteConfig> = [
     path: '/join/room',
     name: 'member.room.join',
     component: JoinRoom,
-  }
+  },
+  {
+    path: '/member/dashboard',
+    name: 'member.dashboard',
+    component: Dashboard
+  },
 ]
 
 const router = new VueRouter({

@@ -28,7 +28,7 @@
                 <div class="flex items-center justify-between">
                     <button
                         v-on:click="joinRoom"
-                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline opacity-50 cursor-not-allowed" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" 
                         type="button">
                         Join
                     </button>
@@ -65,7 +65,33 @@ export default {
     },
     methods: {
         joinRoom () {
-          console.log('joinRoom')
+            const joinRoom = {
+              roomCode: this.member.roomCode,
+              personalCode: this.member.personalCode
+            }
+
+            axios.post('http://localhost:8000/api/v1/authenticate',  {
+                joinRoom
+            }).then(response => {
+                if (response.status === 200) {
+                    sessionStorage.setItem('name', response.data.name)
+                    sessionStorage.setItem('email', response.data.email)
+                    localStorage.setItem('bearer', response.data.bearer)
+                    this.$router.push({
+                        name: 'member.dashboard'
+                    })
+                }
+            }).catch(e => {
+                if (e.request.response != "") {
+                    const message = JSON.parse(e.request.response);
+                    this.notification.success = false;
+                    this.notification.danger = true;
+                    this.notification.title = "Something went wrong.";
+                    this.notification.message = message.message;
+
+                    this.signin.password = ""
+                }
+            });
         }
     },
     
