@@ -124,7 +124,7 @@ export default {
     },
     methods: {
         signupAccount: function () {
-            axios.post('http://localhost:8000/api/v1/register', {
+            axios.post(`${this.$store.getters.serviceUrl}/register`, {
                 name: this.signup.name,
                 email: this.signup.email,
                 association: this.signup.association,

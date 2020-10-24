@@ -90,7 +90,7 @@ export default {
     },
     methods: {
         signinAccount: function () {
-            axios.post('http://localhost:8000/api/v1/authenticate', {
+            axios.post(`${this.$store.getters.serviceUrl}/authenticate`, {
                 email: this.signin.email,
                 password: this.signin.password,
             }).then(response => {

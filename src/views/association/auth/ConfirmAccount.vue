@@ -21,7 +21,7 @@ export default {
     },
     mounted() {
         // Activate User with token
-        axios.post('http://localhost:8000/api/v1/confirm/account', {
+        axios.post(`${this.$store.getters.serviceUrl}/confirm/account`, {
             token: this.urlToken,
         }).then(response => {
             if (response.status === 200) {

@@ -61,35 +61,43 @@ export default {
                 title: "",
                 message: ""
             },
+            params: this.$route.params,
         };
+    },
+    mounted() {
+        if (this.params.notification != undefined)
+            this.notification = this.params.notification
     },
     methods: {
         joinRoom () {
-            const joinRoom = {
-              roomCode: this.member.roomCode,
-              personalCode: this.member.personalCode
-            }
-
-            axios.post('http://localhost:8000/api/v1/authenticate',  {
-                joinRoom
+            axios.post(`${this.$store.getters.serviceUrl}/room/join`,  {
+                roomCode: this.member.roomCode,
+                personalCode: this.member.personalCode
             }).then(response => {
                 if (response.status === 200) {
-                    sessionStorage.setItem('name', response.data.name)
-                    sessionStorage.setItem('email', response.data.email)
-                    localStorage.setItem('bearer', response.data.bearer)
+                    // save room to Vuex
+                    this.$store.state.room = response.data.room;
+
+                    // save codes to Session storage
+                    sessionStorage.setItem('room.code', this.member.roomCode);
+                    sessionStorage.setItem('personal.code', this.member.personalCode);
+                    // push member to the right room
                     this.$router.push({
-                        name: 'member.dashboard'
-                    })
+                        name: 'member.room.index',
+                        params: {
+                          roomCode: this.member.roomCode,
+                          personalCode: this.member.personalCode,
+                        }
+                    });
                 }
             }).catch(e => {
+              console.log(e.request)
                 if (e.request.response != "") {
                     const message = JSON.parse(e.request.response);
                     this.notification.success = false;
                     this.notification.danger = true;
                     this.notification.title = "Something went wrong.";
                     this.notification.message = message.message;
-
-                    this.signin.password = ""
                 }
             });
         }

@@ -124,9 +124,12 @@ export default {
     },
     methods: {
         signOut() {
-            localStorage.removeItem('bearer')
-            sessionStorage.removeItem('name')
-            sessionStorage.removeItem('email')
+            localStorage.removeItem('bearer');
+            sessionStorage.removeItem('name');
+            sessionStorage.removeItem('email');
+
+            // TODO: Is post call nessecary to make token invalid?
+            // Token is only valid for 8 hours..?
 
             this.$router.push({ name: 'signin'} )
         }

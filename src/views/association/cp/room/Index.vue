@@ -93,7 +93,7 @@ export default {
     },
     methods: {
         fetchData() {
-            axios.get('http://localhost:8000/api/v1/room/get', {
+            axios.get(`${this.$store.getters.serviceUrl}/get`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -123,7 +123,7 @@ export default {
                 name: this.room.name
             }
 
-            axios.post('http://localhost:8000/api/v1/room/create', room, {
+            axios.post(`${this.$store.getters.serviceUrl}/room/create`, room, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -150,7 +150,7 @@ export default {
           })
         },
         deleteRoom (id) {
-            axios.delete('http://localhost:8000/api/v1/room/delete/' + id, {
+            axios.delete(`${this.$store.getters.serviceUrl}/room/delete/` + id, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")

@@ -73,14 +73,14 @@
                                             </div>
                                             <div class="ml-5 w-0 flex-1">
                                                 <dl>
-                                                <dt class="text-sm leading-5 font-medium text-cool-gray-500 truncate">
-                                                    Invited members
-                                                </dt>
-                                                <dd>
-                                                    <div class="text-lg leading-7 font-medium text-cool-gray-900">
-                                                        0
-                                                    </div>
-                                                </dd>
+                                                    <dt class="text-sm leading-5 font-medium text-cool-gray-500 truncate">
+                                                        Invited members
+                                                    </dt>
+                                                    <dd>
+                                                        <div class="text-lg leading-7 font-medium text-cool-gray-900">
+                                                            {{ dbRoom.invitations_send }}
+                                                        </div>
+                                                    </dd>
                                                 </dl>
                                             </div>
                                             </div>
@@ -89,13 +89,38 @@
                                             <div class="text-sm leading-5">
                                             <p 
                                                 v-on:click="toggleInviteModal" 
-                                                class="font-medium text-blue-600 hover:text-blue-900 transition ease-in-out duration-150">
+                                                class="invite-member font-medium text-blue-600 hover:text-blue-900 transition ease-in-out duration-150">
                                                 Invite member
                                             </p>
                                             </div>
                                         </div>
                                     </div>
-                                <!-- More cards... -->
+
+                                    <!-- Card --> 
+                                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                                        <div class="p-5">
+                                            <div class="flex items-center">
+                                            <div class="flex-shrink-0">
+                                                <!-- Heroicon name: scale -->
+                                                <svg class="h-6 w-6 text-cool-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt class="text-sm leading-5 font-medium text-cool-gray-500 truncate">
+                                                        Members joined
+                                                    </dt>
+                                                    <dd>
+                                                        <div class="text-lg leading-7 font-medium text-cool-gray-900">
+                                                            {{ dbRoom.members_joined }}
+                                                        </div>
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -167,7 +192,7 @@ export default {
     },
     methods: {
         fetchData() {
-            axios.get('http://localhost:8000/api/v1/room/find/' + this.dbRoom.id, {
+            axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -197,7 +222,7 @@ export default {
                 name: this.room.name
             }
 
-            axios.post('http://localhost:8000/api/v1/room/create', room, {
+            axios.post(`${this.$store.getters.serviceUrl}/room/create`, room, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -220,7 +245,7 @@ export default {
                 roomId: this.dbRoom.id
             }
 
-            axios.post('http://localhost:8000/api/v1/member/invite', invite, {
+            axios.post(`${this.$store.getters.serviceUrl}/member/invite`, invite, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -228,7 +253,8 @@ export default {
             }).then(response => {
                 if (response.status === 200) {
                     this.member.email = "";
-                    
+                    this.dbRoom = response.data.room;
+
                     this.notification.success = true;
                     this.notification.danger = false;
                     this.notification.title = "Invite sent!";
@@ -251,7 +277,7 @@ export default {
             const id = {
                 id: this.dbRoom.id
             }
-            axios.put('http://localhost:8000/api/v1/room/open', id, {
+            axios.put(`${this.$store.getters.serviceUrl}/room/open`, id, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -272,7 +298,7 @@ export default {
             const id = {
                 id: this.dbRoom.id
             }
-            axios.put('http://localhost:8000/api/v1/room/close', id, {
+            axios.put(`${this.$store.getters.serviceUrl}/room/close`, id, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -300,5 +326,7 @@ export default {
 </script>
 
 <style>
-
+.invite-member:hover {
+    cursor: pointer;
+}
 </style>

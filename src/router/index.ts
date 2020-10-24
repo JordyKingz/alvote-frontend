@@ -9,6 +9,7 @@ import Rooms from '../views/association/cp/room/Index.vue'
 import ShowRoom from '../views/association/cp/room/Show.vue'
 
 import JoinRoom from '../views/member/room/Join.vue'
+import ConferenceRoom from '../views/member/room/Index.vue'
 
 Vue.use(VueRouter)
 
@@ -54,9 +55,13 @@ const routes: Array<RouteConfig> = [
     component: JoinRoom,
   },
   {
-    path: '/member/dashboard',
-    name: 'member.dashboard',
-    component: Dashboard
+    // // Check if member has valid room code and valid personal code
+    path: '/room/:roomCode',
+    name: 'member.room.index',
+    component: ConferenceRoom,
+    meta: {
+      checkMember: true,
+    },
   },
 ]
 
@@ -65,5 +70,24 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+router.beforeEach((to, _from, next) => {
+  if (to.matched.some((record) => record.meta.checkMember)) {
+
+    // const roomCode = sessionStorage.getItem('room.code');
+    // const personalCode = sessionStorage.getItem('personal.code');
+    
+    // console.log(roomCode, _from.query.personalCode)
+    // if (_from.query.personalCode != personalCode || _from.query.roomCode != roomCode) {
+    //   sessionStorage.removeItem('room.code');
+    //   sessionStorage.removeItem('personal.code');
+
+    //   return next('/join/room');
+    // }
+    return next();
+  }
+
+  return next();
+});
 
 export default router
