@@ -48,35 +48,15 @@ export default {
         };
     },
     created() {
-        console.log(this.$store.getters.roomJoined)
-        if (!this.$store.getters.roomJoined) {
-            // Check if member has valid room code and valid personal code
-            const dto = {
-                roomCode: this.roomCode,
-                personalCode: this.personalCode
-            }
-            axios.post(`${this.$store.getters.serviceUrl}/validate-codes`, dto, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },  
-            }).then(
-                this.$store.state.roomJoined = true
-            ).catch(e => {
-                // reset vuex value
-                this.$store.state.roomJoined = false;
-                
-                const message = JSON.parse(e.request.response);
-                this.notification.success = false;
-                this.notification.danger = true;
-                this.notification.title = "Something went wrong.";
-                this.notification.message = message.message;
-                this.$router.push({ name: 'member.room.join', params: { notification: this.notification}});
-            });
+        // Check if session code is the same as the url parameter
+        if (sessionStorage.getItem('room.code') != this.roomCode || sessionStorage.getItem('room.code') != this.personalCode) {
+            this.notification.success = false;
+            this.notification.danger = true;
+            this.notification.title = "Something went wrong.";
+            this.notification.message = "The codes has changed. You leaved the room.";
+            this.$router.push({ name: 'member.room.join', params: { notification: this.notification}});
         }
     },
-    mounted() {
-        console.log(`roomcode: ${this.roomCode}, and personalcode: ${this.personalCode}`);
-    }
 }
 </script>
 

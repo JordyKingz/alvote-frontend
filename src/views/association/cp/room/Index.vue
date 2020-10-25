@@ -93,7 +93,7 @@ export default {
     },
     methods: {
         fetchData() {
-            axios.get(`${this.$store.getters.serviceUrl}/get`, {
+            axios.get(`${this.$store.getters.serviceUrl}/room/get`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -101,6 +101,7 @@ export default {
             }).then(response => {
                 this.rooms = response.data.rooms
                 this.association = response.data.association
+
                 if (this.rooms.length < 1) {
                     this.notification.warning = true
                     this.notification.title = "No rooms found."

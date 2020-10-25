@@ -91,7 +91,6 @@ export default {
                     });
                 }
             }).catch(e => {
-              console.log(e.request)
                 if (e.request.response != "") {
                     const message = JSON.parse(e.request.response);
                     this.notification.success = false;

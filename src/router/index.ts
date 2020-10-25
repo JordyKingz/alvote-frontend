@@ -56,7 +56,7 @@ const routes: Array<RouteConfig> = [
   },
   {
     // // Check if member has valid room code and valid personal code
-    path: '/room/:roomCode',
+    path: '/room/:roomCode/:personalCode',
     name: 'member.room.index',
     component: ConferenceRoom,
     meta: {
