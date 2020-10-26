@@ -146,6 +146,7 @@
 
 <script>
 import axios from 'axios';
+import Pusher from 'pusher-js'
 
 import Alert from '@/components/alert/Alert.vue'
 import Sidebar from '@/components/Sidebar.vue'

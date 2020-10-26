@@ -7,6 +7,8 @@ export default new Vuex.Store({
   state: {
     localService: 'http://localhost:8000/api/v1',
     prodService: 'https://alvote.nl/api/v1',
+
+
     room: {},
     roomJoined: false,
   },

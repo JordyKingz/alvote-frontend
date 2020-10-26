@@ -40,6 +40,7 @@
 
 <script>
 import axios from 'axios';
+import Pusher from 'pusher-js'
 
 import Alert from '@/components/alert/Alert.vue'
 
@@ -81,6 +82,7 @@ export default {
                     // save codes to Session storage
                     sessionStorage.setItem('room.code', this.member.roomCode);
                     sessionStorage.setItem('personal.code', this.member.personalCode);
+
                     // push member to the right room
                     this.$router.push({
                         name: 'member.room.index',
@@ -91,7 +93,7 @@ export default {
                     });
                 }
             }).catch(e => {
-                if (e.request.response != "") {
+                if (e.request.response != undefined && e.request.response != "") {
                     const message = JSON.parse(e.request.response);
                     this.notification.success = false;
                     this.notification.danger = true;
