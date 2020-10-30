@@ -49,7 +49,8 @@ export default {
     },
     created() {
         // Check if session code is the same as the url parameter
-        if (sessionStorage.getItem('room.code') != this.roomCode || sessionStorage.getItem('room.code') != this.personalCode) {
+        console.log(sessionStorage.getItem('room.code'))
+        if (sessionStorage.getItem('room.code') != this.roomCode || sessionStorage.getItem('personal.code') != this.personalCode) {
             this.notification.success = false;
             this.notification.danger = true;
             this.notification.title = "Something went wrong.";
