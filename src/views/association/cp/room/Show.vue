@@ -137,7 +137,7 @@
                                                       </dt>
                                                       <dd>
                                                           <div class="text-lg leading-7 font-medium text-cool-gray-900">
-                                                              ...
+                                                              {{ votes.length }}
                                                           </div>
                                                       </dd>
                                                   </dl>
@@ -147,7 +147,7 @@
                                           <div class="bg-cool-gray-50 px-5 py-3">
                                               <div class="text-sm leading-5">
                                                 <p 
-                                                    v-on:click="toggleInviteModal" 
+                                                    v-on:click="toggleVoteModal" 
                                                     class="invite-member font-medium text-blue-600 hover:text-blue-900 transition ease-in-out duration-150">
                                                     Create vote
                                                 </p>
@@ -169,6 +169,12 @@
                               :member="member"
                               @invite="invite"
                               @toggleModal="toggleInviteModal"/>
+
+                            <VoteModal 
+                              v-show="voteModal"
+                              :vote="vote"
+                              @create="createVote"
+                              @toggleModal="toggleVoteModal"/>
                         </div>
                     </div>
                 </main>
@@ -179,12 +185,13 @@
 
 <script>
 import axios from 'axios';
-import Pusher from 'pusher-js'
+// import Pusher from 'pusher-js'
 
 import Alert from '@/components/alert/Alert.vue'
 import Sidebar from '@/components/Sidebar.vue'
 // import Rooms from '@/components/tables/Rooms.vue'
 import CreateRoom from '@/components/forms/create/Room.vue'
+import VoteModal from '@/components/forms/create/Vote.vue'
 import InviteMember from '@/components/forms/invite/Member.vue'
 
 export default {
@@ -194,7 +201,8 @@ export default {
         Sidebar,
         // Rooms,
         InviteMember,
-        CreateRoom
+        CreateRoom,
+        VoteModal
     },
     data() {
         return {
@@ -210,8 +218,14 @@ export default {
             member: {
                 email: '',
             },
+            vote: {
+                name: '',
+                answers: '' // serialized string with array of answer objects
+            },
+            votes: [],
             showCreateRoom: false,
             inviteMember: false,
+            voteModal: false,
             notification: {
                 success: false,
                 warning: false,
@@ -232,9 +246,9 @@ export default {
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
                 },
             }).then(response => {
-                this.dbRoom = response.data.room
-                this.association = response.data.association
-                
+                this.dbRoom = response.data.room;
+                this.association = response.data.association;
+                this.votes = response.data.votes;
             }).catch(e => {
                 if (e.request.status === 404 ) {
                     this.notification.success = false;
@@ -254,7 +268,7 @@ export default {
         createRoom() {
             const room = {
                 name: this.room.name
-            }
+            };
 
             axios.post(`${this.$store.getters.serviceUrl}/room/create`, room, {
                 headers: {
@@ -263,6 +277,31 @@ export default {
                 },
             }).then(response => {
                 this.$router.push({ name: 'association.rooms'});
+            }).catch(e => {
+                if (e.request.response != "") {
+                    const message = JSON.parse(e.request.response);
+                    this.notification.success = false;
+                    this.notification.danger = true;
+                    this.notification.title = "Something went wrong.";
+                    this.notification.message = message.message;
+                }
+            });
+        },
+        createVote(answers) {
+            const dto = {
+                name: this.vote.name,
+                answers: JSON.stringify(answers),
+                roomId: this.$route.params.id
+            }
+
+            axios.post(`${this.$store.getters.serviceUrl}/vote/create`, dto, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                },
+            }).then(response => {
+                this.fetchData();
+                this.toggleVoteModal();
             }).catch(e => {
                 if (e.request.response != "") {
                     const message = JSON.parse(e.request.response);
@@ -297,7 +336,6 @@ export default {
                     this.toggleInviteModal();
                 }
             }).catch(e => {
-                console.log(e.request)
                 if (e.request.response != "") {
                     const message = JSON.parse(e.request.response);
                     this.notification.success = false;
@@ -355,7 +393,10 @@ export default {
         toggleInviteModal() {
             this.inviteMember = !this.inviteMember;
         },
-    },
+        toggleVoteModal () {
+          this.voteModal = !this.voteModal;
+        }
+      },
 }
 </script>
 
