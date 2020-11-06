@@ -26,7 +26,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+// import axios from 'axios';
+import Echo from "laravel-echo"
 
 export default {
     name: 'member.room',
@@ -37,7 +38,7 @@ export default {
             roomCode: this.$route.params.roomCode,
             personalCode: this.$route.params.personalCode,
             room: this.$store.getters.room,
-
+            roomCodes: [],
             notification: {
                 success: false,
                 warning: false,
@@ -57,6 +58,31 @@ export default {
             this.notification.message = "The codes has changed. You leaved the room.";
             this.$router.push({ name: 'member.room.join', params: { notification: this.notification}});
         }
+        // const roomCode = this.roomCode
+        // Echo.join(`memberJoined-${roomCode}`)
+        //   .here(roomCode => {
+        //       console.log(roomCode);
+        //       this.roomCode = roomCode;
+        //   })
+        //   .joining(roomCode => {
+        //       this.roomCodes.push(roomCode);
+        //       console.log(this.roomCodes);
+        //   })
+          // .leaving(user => {
+          //     this.users = this.users.filter(u => u.id != user.id);
+          // })
+          // .listen('ChatEvent',(event) => {
+          //     this.messages.push(event.chat);
+          // })
+          // .listenForWhisper('typing', user => {
+          //     this.activeUser = user;
+          //     if(this.typingTimer) {
+          //         clearTimeout(this.typingTimer);
+          //     }
+          //     this.typingTimer = setTimeout(() => {
+          //         this.activeUser = false;
+          //     }, 1000);
+          // })
     },
 }
 </script>

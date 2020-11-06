@@ -185,6 +185,8 @@
 
 <script>
 import axios from 'axios';
+// import bus from '@/bus'
+// import VueEcho from 'vue-echo-laravel';
 // import Pusher from 'pusher-js'
 
 import Alert from '@/components/alert/Alert.vue'
@@ -210,7 +212,9 @@ export default {
             email: sessionStorage.getItem('email'),
             dbRoom: {
               id: this.$route.params.id,
-              name: ''
+              name: '',
+              /* eslint-disable @typescript-eslint/camelcase */
+              join_code: '',
             },
             room: {
               name: ''
@@ -222,6 +226,7 @@ export default {
                 name: '',
                 answers: '' // serialized string with array of answer objects
             },
+            //array: [],
             votes: [],
             showCreateRoom: false,
             inviteMember: false,
@@ -246,6 +251,7 @@ export default {
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
                 },
             }).then(response => {
+              console.log(response.data)
                 this.dbRoom = response.data.room;
                 this.association = response.data.association;
                 this.votes = response.data.votes;
