@@ -185,9 +185,8 @@
 
 <script>
 import axios from 'axios';
-// import bus from '@/bus'
-// import VueEcho from 'vue-echo-laravel';
-// import Pusher from 'pusher-js'
+import Pusher from 'pusher-js';
+import Echo from 'laravel-echo'
 
 import Alert from '@/components/alert/Alert.vue'
 import Sidebar from '@/components/Sidebar.vue'
@@ -238,20 +237,45 @@ export default {
                 title: "",
                 message: ""
             },
+            echo: {},
         };
     },
-    created() {
-        this.fetchData();
+    async mounted() {
+        await this.fetchData();
+        await this.connect();
     },
     methods: {
-        fetchData() {
-            axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
+        async connect() {
+          const token =  localStorage.getItem("bearer");
+          const echo = new Echo({
+              broadcaster: 'pusher',
+              key: `${this.$store.getters.pusherKey}`,
+              wsHost: 'http://localhost',
+              authEndpoint: 'http://localhost:6001/broadcasting/auth',
+              encrypted: true,
+              forceTLS: false,
+              wsPort: 6001,
+              wssPort: 6001,
+              disableStats: true,
+              enabledTransports: ['ws', 'wss'],
+              auth: {
+                  headers: {
+                      authorization: 'Bearer ' + token,
+                  }
+              }
+          });
+          echo.channel(`memberJoined-${this.dbRoom.join_code}`)
+              .listen('MemberJoinedRoom', (e) => {
+                  console.log('test successful ' + e)
+          });
+        },
+        async fetchData() {
+            await axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
                 },
             }).then(response => {
-              console.log(response.data)
                 this.dbRoom = response.data.room;
                 this.association = response.data.association;
                 this.votes = response.data.votes;
@@ -332,7 +356,8 @@ export default {
             }).then(response => {
                 if (response.status === 200) {
                     this.member.email = "";
-                    this.dbRoom = response.data.room;
+                    // Increment
+                    this.dbRoom.invitations_send++;
 
                     this.notification.success = true;
                     this.notification.danger = false;
