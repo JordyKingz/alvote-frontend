@@ -250,23 +250,13 @@ export default {
           const echo = new Echo({
               broadcaster: 'pusher',
               key: `${this.$store.getters.pusherKey}`,
-              wsHost: 'http://localhost',
-              authEndpoint: 'http://localhost:6001/broadcasting/auth',
-              encrypted: true,
-              forceTLS: false,
-              wsPort: 6001,
-              wssPort: 6001,
-              disableStats: true,
-              enabledTransports: ['ws', 'wss'],
-              auth: {
-                  headers: {
-                      authorization: 'Bearer ' + token,
-                  }
-              }
+              cluster: 'eu',
+              encrypted: false,
           });
-          echo.channel(`memberJoined-${this.dbRoom.join_code}`)
-              .listen('MemberJoinedRoom', (e) => {
-                  console.log('test successful ' + e)
+          echo.channel(`memberJoined`)
+              .listen(`MemberJoinedRoom`, (event) => {
+                this.dbRoom = event.room;
+                console.log(event.room);
           });
         },
         async fetchData() {
