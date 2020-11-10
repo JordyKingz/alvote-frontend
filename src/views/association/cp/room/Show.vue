@@ -253,11 +253,15 @@ export default {
               cluster: 'eu',
               encrypted: false,
           });
+
+          // Member joined channel
           echo.channel(`memberJoined`)
               .listen(`MemberJoinedRoom`, (event) => {
                 this.dbRoom = event.room;
                 console.log(event.room);
           });
+          
+          // Member voted channel
         },
         async fetchData() {
             await axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
