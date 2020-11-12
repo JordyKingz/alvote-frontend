@@ -1,50 +1,88 @@
 <template>
     <div id="signin">
         <Alert :notification="notification"/>
-        <div class="w-full max-w-xs mx-auto p-4 m-5 border border-gray-200 bg-white shadow">
-            <form class="bg-white">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-                    Email
-                    </label>
-                    <input 
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                        id="email" 
-                        type="email" 
-                        v-model="signin.email" 
-                        placeholder="Email">
+        <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full">
+                <div>
+                    <img class="mx-auto h-12 w-auto" src="https://tailwindui.com/img/logos/v1/workflow-mark-on-white.svg" alt="Workflow">
+                    <h2 class="mt-6 text-center text-3xl leading-9 font-extrabold text-gray-900">
+                        Sign in to your account
+                    </h2>
                 </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                        Password
-                    </label>
-                    <input
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" 
-                        id="password" 
-                        v-model="signin.password" 
-                        type="password" 
-                        placeholder="******************">
+                <div class="mt-8">
+                    <input type="hidden" name="remember" value="true">
+                    <div class="rounded-md shadow-sm">
+                        <div>
+                        <input 
+                            aria-label="Email address" 
+                            type="email" 
+                            v-model="signin.email"
+                            required 
+                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5" 
+                            placeholder="Email address">
+                        </div>
+                        <div class="-mt-px">
+                            <input 
+                                aria-label="Password" 
+                                v-model="signin.password" 
+                                type="password" 
+                                required 
+                                class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5" 
+                                placeholder="Password">
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="flex items-center">
+                        <input id="remember_me" type="checkbox" class="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out">
+                        <label for="remember_me" class="ml-2 block text-sm leading-5 text-gray-900">
+                            Remember me
+                        </label>
+                        </div>
+
+                        <div class="text-sm leading-5">
+                        <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">
+                            Forgot your password?
+                        </a>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <button 
+                            v-if="formInvalid"
+                            :disabled="formInvalid"
+                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out cursor-not-allowed">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400 transition ease-in-out duration-150" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            Sign in
+                        </button>
+                        <button 
+                            v-else
+                            :disabled="formInvalid"
+                            v-on:click="signinAccount"
+                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400 transition ease-in-out duration-150" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            Sign in
+                        </button>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="text-sm leading-5">
+                            <router-link
+                                :to="{ name: 'signup' }"
+                                class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150" href="#">
+                                No account yet? Sign up
+                            </router-link>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center justify-between">
-                    <button v-if="formInvalid"
-                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline opacity-50 cursor-not-allowed" 
-                        type="button"
-                        :disabled="formInvalid">
-                        Sign In
-                    </button>
-                    <button v-else
-                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" 
-                        type="button"
-                        v-on:click="signinAccount">
-                        Sign In
-                    </button>
-                    <router-link
-                        :to="{ name: 'signup' }"
-                        class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
-                        No account yet? Sign up
-                    </router-link>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </template>
@@ -118,15 +156,6 @@ export default {
     watch: {
         signin: {
             handler(input) {
-                if (input.password.length > 0 && input.password.length < 10) {
-                    this.validation.error.password = "Weak password";
-                    this.validation.requirements.password = "Password needs more than 10 characters";
-                } else {
-                    // remove weak password message
-                    this.validation.error.password = "";
-                    this.validation.requirements.password = "";
-                }
-
                 if (input.email != "" && input.password.length > 9) {
                     this.formInvalid = false;
                 } else {

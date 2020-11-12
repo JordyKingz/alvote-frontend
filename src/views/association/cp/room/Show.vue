@@ -155,8 +155,15 @@
                                           </div>
                                       </div>
                                   </div>
-                              </div>
-                            
+                            </div>
+
+                            <div class="mt-8">
+                                <!-- Overview -->
+                                <h2 class="text-lg leading-6 font-medium text-cool-gray-900">VOTES</h2>
+
+                                <Votes
+                                  :votes="votes"/>
+                            </div>
                             
                             <CreateRoom 
                               v-show="showCreateRoom"
@@ -190,7 +197,7 @@ import Echo from 'laravel-echo'
 
 import Alert from '@/components/alert/Alert.vue'
 import Sidebar from '@/components/Sidebar.vue'
-// import Rooms from '@/components/tables/Rooms.vue'
+import Votes from '@/components/votes/Overview.vue'
 import CreateRoom from '@/components/forms/create/Room.vue'
 import VoteModal from '@/components/forms/create/Vote.vue'
 import InviteMember from '@/components/forms/invite/Member.vue'
@@ -200,7 +207,7 @@ export default {
     components: {
         Alert,
         Sidebar,
-        // Rooms,
+        Votes,
         InviteMember,
         CreateRoom,
         VoteModal
@@ -237,15 +244,15 @@ export default {
                 title: "",
                 message: ""
             },
-            echo: {},
         };
     },
     async mounted() {
-        await this.fetchData();
-        await this.connect();
+        await this.fetchRoom();
+        await this.fetchVotes();
+        await this.connectChannels();
     },
     methods: {
-        async connect() {
+        async connectChannels() {
           const token =  localStorage.getItem("bearer");
           const echo = new Echo({
               broadcaster: 'pusher',
@@ -263,7 +270,7 @@ export default {
           
           // Member voted channel
         },
-        async fetchData() {
+        async fetchRoom() {
             await axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -272,6 +279,29 @@ export default {
             }).then(response => {
                 this.dbRoom = response.data.room;
                 this.association = response.data.association;
+            }).catch(e => {
+                if (e.request.status === 404 ) {
+                    this.notification.success = false;
+                    this.notification.danger = true;
+                    this.notification.title = "Request returned 404";
+                    this.notification.message = "No API call available: /api/v1/room/find/{id}";
+                }
+                else if (e.request.response != "") {
+                    const message = JSON.parse(e.request.response);
+                    this.notification.success = false;
+                    this.notification.danger = true;
+                    this.notification.title = "Something went wrong.";
+                    this.notification.message = message.message;
+                }
+            });
+        },
+        async fetchVotes() {
+            await axios.get(`${this.$store.getters.serviceUrl}/votes/room/` + this.dbRoom.id, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                },
+            }).then(response => {
                 this.votes = response.data.votes;
             }).catch(e => {
                 if (e.request.status === 404 ) {
