@@ -92,7 +92,7 @@ export default {
       nextYear: new Date().getFullYear() + 1,
       answers: [
           {
-              name: ''
+              answer: ''
           }
       ],
     }
@@ -100,13 +100,12 @@ export default {
   methods: {
     addAnswer () {
         const object = {
-            name: ''
+            answer: ''
         }
 
         this.answers.push(object)
     },
     create() {
-        console.log(this.answers)
         this.$emit('create', this.answers);
     },
     toggleModal() {

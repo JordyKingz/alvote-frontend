@@ -18,9 +18,46 @@
                             <div class="flex-1 min-w-0">
                                 <h1 class="text-2xl font-semibold text-gray-900">Room: {{ dbRoom.name }}</h1>
                                 <div class="mt-5">
-                                    <router-link :to="{ name: 'association.rooms' }">
-                                        <h1 class="text-1xl font-semibold text-blue-900">Back to overview</h1>
-                                    </router-link>
+                                    <nav class="flex" aria-label="Breadcrumb">
+                                        <ol class="flex items-center space-x-4">
+                                            <li>
+                                                <div>
+                                                    <router-link 
+                                                        :to="{ name: 'association.dashboard' }" class="text-gray-400 hover:text-gray-500">
+                                                        <!-- Heroicon name: home -->
+                                                        <svg class="flex-shrink-0 h-5 w-5 transition duration-150 ease-in-out" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                                                        </svg>
+                                                    
+                                                        <span class="sr-only">Dashboard</span>
+                                                    </router-link>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="flex items-center space-x-4">
+                                                    <!-- Heroicon name: chevron-right -->
+                                                    <svg class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <router-link 
+                                                        :to="{ name: 'association.rooms' }" 
+                                                        aria-current="page" 
+                                                        class="text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 transition duration-150 ease-in-out">
+                                                        Rooms
+                                                    </router-link>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="flex items-center space-x-4">
+                                                    <!-- Heroicon name: chevron-right -->
+                                                    <svg class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <a href="#" aria-current="page" class="text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 transition duration-150 ease-in-out">{{ dbRoom.name }}</a>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </nav>
                                 </div>
                             </div>
                             <div class="mt-4 flex md:mt-0 md:ml-4">
@@ -247,12 +284,12 @@ export default {
         };
     },
     async mounted() {
-        await this.fetchRoom();
-        await this.fetchVotes();
         await this.connectChannels();
+        this.fetchRoom();
+        this.fetchVotes();
     },
     methods: {
-        async connectChannels() {
+      async connectChannels() {
           const token =  localStorage.getItem("bearer");
           const echo = new Echo({
               broadcaster: 'pusher',
@@ -265,13 +302,12 @@ export default {
           echo.channel(`memberJoined`)
               .listen(`MemberJoinedRoom`, (event) => {
                 this.dbRoom = event.room;
-                console.log(event.room);
           });
           
           // Member voted channel
         },
-        async fetchRoom() {
-            await axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
+        fetchRoom() {
+           axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -295,8 +331,8 @@ export default {
                 }
             });
         },
-        async fetchVotes() {
-            await axios.get(`${this.$store.getters.serviceUrl}/votes/room/` + this.dbRoom.id, {
+        fetchVotes() {
+            axios.get(`${this.$store.getters.serviceUrl}/votes/room/` + this.dbRoom.id, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
@@ -354,7 +390,8 @@ export default {
                     'Authorization': 'Bearer ' + localStorage.getItem("bearer")
                 },
             }).then(response => {
-                this.fetchData();
+                this.fetchVotes();
+                this.fetchRoom();
                 this.toggleVoteModal();
             }).catch(e => {
                 if (e.request.response != "") {
