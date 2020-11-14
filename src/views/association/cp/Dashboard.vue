@@ -36,8 +36,8 @@ export default {
     },
     data() {
         return {
-            name: sessionStorage.getItem('name'),
-            email: sessionStorage.getItem('email'),
+            name: sessionStorage.getItem('alvote.name'),
+            email: sessionStorage.getItem('alvote.email'),
         };
     },
     mounted() {

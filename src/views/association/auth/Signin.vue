@@ -133,9 +133,9 @@ export default {
                 password: this.signin.password,
             }).then(response => {
                 if (response.status === 200) {
-                    sessionStorage.setItem('name', response.data.name)
-                    sessionStorage.setItem('email', response.data.email)
-                    localStorage.setItem('bearer', response.data.bearer)
+                    sessionStorage.setItem('alvote.name', response.data.name)
+                    sessionStorage.setItem('alvote.email', response.data.email)
+                    sessionStorage.setItem('alvote.bearer', response.data.bearer)
                     this.$router.push({
                         name: 'association.dashboard'
                     })

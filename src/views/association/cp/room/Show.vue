@@ -17,48 +17,8 @@
                         <div class="md:flex md:items-center md:justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="flex-1 min-w-0">
                                 <h1 class="text-2xl font-semibold text-gray-900">Room: {{ dbRoom.name }}</h1>
-                                <div class="mt-5">
-                                    <nav class="flex" aria-label="Breadcrumb">
-                                        <ol class="flex items-center space-x-4">
-                                            <li>
-                                                <div>
-                                                    <router-link 
-                                                        :to="{ name: 'association.dashboard' }" class="text-gray-400 hover:text-gray-500">
-                                                        <!-- Heroicon name: home -->
-                                                        <svg class="flex-shrink-0 h-5 w-5 transition duration-150 ease-in-out" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                                                        </svg>
-                                                    
-                                                        <span class="sr-only">Dashboard</span>
-                                                    </router-link>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="flex items-center space-x-4">
-                                                    <!-- Heroicon name: chevron-right -->
-                                                    <svg class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    <router-link 
-                                                        :to="{ name: 'association.rooms' }" 
-                                                        aria-current="page" 
-                                                        class="text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 transition duration-150 ease-in-out">
-                                                        Rooms
-                                                    </router-link>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="flex items-center space-x-4">
-                                                    <!-- Heroicon name: chevron-right -->
-                                                    <svg class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    <a href="#" aria-current="page" class="text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 transition duration-150 ease-in-out">{{ dbRoom.name }}</a>
-                                                </div>
-                                            </li>
-                                        </ol>
-                                    </nav>
-                                </div>
+                                <Breadcrumb
+                                    :routes="routes" />
                             </div>
                             <div class="mt-4 flex md:mt-0 md:ml-4">
                                 <span class="shadow-sm rounded-md">
@@ -196,10 +156,13 @@
 
                             <div class="mt-8">
                                 <!-- Overview -->
-                                <h2 class="text-lg leading-6 font-medium text-cool-gray-900">VOTES</h2>
+                                <h2 class="text-lg leading-6 font-medium text-cool-gray-900">Votes</h2>
 
                                 <Votes
-                                  :votes="votes"/>
+                                  class="mt-2"
+                                  :votes="votes"
+                                  :members="Number(dbRoom.members_joined)"
+                                  :voted="0"/>
                             </div>
                             
                             <CreateRoom 
@@ -234,6 +197,7 @@ import Echo from 'laravel-echo'
 
 import Alert from '@/components/alert/Alert.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 import Votes from '@/components/votes/Overview.vue'
 import CreateRoom from '@/components/forms/create/Room.vue'
 import VoteModal from '@/components/forms/create/Vote.vue'
@@ -244,6 +208,7 @@ export default {
     components: {
         Alert,
         Sidebar,
+        Breadcrumb,
         Votes,
         InviteMember,
         CreateRoom,
@@ -271,6 +236,12 @@ export default {
             },
             //array: [],
             votes: [],
+            routes: [
+                {
+                    name: 'Rooms',
+                    url: 'association.rooms'
+                },
+            ],
             showCreateRoom: false,
             inviteMember: false,
             voteModal: false,
@@ -285,12 +256,19 @@ export default {
     },
     async mounted() {
         await this.connectChannels();
-        this.fetchRoom();
+        await this.fetchRoom();
         this.fetchVotes();
+
+        const route = {
+            name: this.dbRoom.name,
+            url: ''
+        }
+
+        this.routes.push(route);
     },
     methods: {
       async connectChannels() {
-          const token =  localStorage.getItem("bearer");
+        //   const token =  sessionStorage.getItem("alvote.bearer");
           const echo = new Echo({
               broadcaster: 'pusher',
               key: `${this.$store.getters.pusherKey}`,
@@ -306,11 +284,11 @@ export default {
           
           // Member voted channel
         },
-        fetchRoom() {
-           axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
+        async fetchRoom() {
+            await axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.dbRoom = response.data.room;
@@ -335,7 +313,7 @@ export default {
             axios.get(`${this.$store.getters.serviceUrl}/votes/room/` + this.dbRoom.id, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.votes = response.data.votes;
@@ -363,7 +341,7 @@ export default {
             axios.post(`${this.$store.getters.serviceUrl}/room/create`, room, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.$router.push({ name: 'association.rooms'});
@@ -387,7 +365,7 @@ export default {
             axios.post(`${this.$store.getters.serviceUrl}/vote/create`, dto, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.fetchVotes();
@@ -412,7 +390,7 @@ export default {
             axios.post(`${this.$store.getters.serviceUrl}/member/invite`, invite, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 if (response.status === 200) {
@@ -444,7 +422,7 @@ export default {
             axios.put(`${this.$store.getters.serviceUrl}/room/open`, id, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.dbRoom = response.data.room
@@ -465,7 +443,7 @@ export default {
             axios.put(`${this.$store.getters.serviceUrl}/room/close`, id, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.dbRoom = response.data.room

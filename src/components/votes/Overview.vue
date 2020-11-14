@@ -2,7 +2,9 @@
     <div id="votes">
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
             <ul>
-                <li v-for="(vote, index) in votes" :key="index">
+                <li 
+                    v-for="(vote, index) in votes" :key="index"
+                    class="mt-3">
                     <a href="#" class="block hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out">
                         <div class="px-4 py-4 sm:px-6">
                             <div class="flex items-center justify-between">
@@ -10,35 +12,39 @@
                                     {{ vote.name }}
                                 </div>
                                 <div class="ml-2 flex-shrink-0 flex">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        <!-- Full-time -->
-                                        {{ vote }}
+                                    <span 
+                                        v-if="vote.status == 0"
+                                        v-on:click="openVote(vote.id)"
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-blue-500 bg-blue-100 hover:text-blue-700">
+                                        Aanzetten
+                                    </span>
+                                    <span 
+                                        v-else-if="vote.status == 1"
+                                        v-on:click="closeVote(vote.id)"
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Open
+                                    </span>
+                                    <span 
+                                        v-else-if="vote.status == 2"
+                                        v-on:click="openVote(vote.id)"
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-blue-500 bg-blue-100 hover:text-blue-700">
+                                        Stemmen binnen
                                     </span>
                                 </div>
                             </div>
                             <div class="mt-2 sm:flex sm:justify-between">
                                 <div class="sm:flex">
-                                    <!-- <div class="mr-6 flex items-center text-sm leading-5 text-gray-500">
-                                        <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                                        </svg>
-                                        Engineering
+                                    <div class="mr-6 flex items-center text-sm leading-5 text-gray-500">
+                                        Stemmen: 
+                                        {{ voted }} / {{ members }}
                                     </div>
-                                    <div class="mt-2 flex items-center text-sm leading-5 text-gray-500 sm:mt-0">
-                                        <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-                                        Remote
-                                    </div> -->
                                 </div>
-                                <div class="mt-2 flex items-center text-sm leading-5 text-gray-500 sm:mt-0">
-                                    <!-- <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                                    </svg>
-                                    <span>
-                                        Closing on
-                                        <time datetime="2020-01-07">January 7, 2020</time>
-                                    </span> -->
+                            </div>
+                        </div>
+                        <div class="px-4 py-4 sm:px-6">
+                            <div class="flex items-center justify-between">
+                                <div class="ml-2 flex-shrink-0 flex">
+                                    <BarChart :chartdata="chartdata" :options="options"/>
                                 </div>
                             </div>
                         </div>
@@ -50,11 +56,88 @@
 </template>
 
 <script>
+import axios from 'axios';
+import BarChart from '@/components/votes/Chart.vue'
+
 export default {
-  name: 'component.votes.overview',
-  props: {
-    votes: Array,
-  }
+    name: 'component.votes.overview',
+    props: {
+        votes: Array,
+        members: Number,
+        voted: Number,
+    },
+    components: {
+        BarChart
+    },
+    data: () => ({
+        chartdata: {
+            labels: ['January', 'February'],
+            datasets: [
+                {
+                    label: 'Data One',
+                    backgroundColor: '#f87979',
+                    data: [40, 20]
+                },
+                {
+                    label: 'Data One',
+                    backgroundColor: '#f87979',
+                    data: [40, 20]
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    }),
+    methods: {
+        openVote(id) {
+            axios.put(`${this.$store.getters.serviceUrl}/vote/open`, id, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
+                },
+                params: {
+                    id: id
+                },
+            }).then(response => {
+                if (response.status === 200) {
+                    for (let index = 0; index < this.votes.length; index++) {
+                        if (this.votes[index].id === id) {
+                            this.votes[index].status = 1;
+                        }
+                    }
+                }
+            }).catch(e => {
+                if (e.request.response != "") {
+                   console.log(e.request)
+                }
+            });
+        },
+        closeVote(id) {
+            axios.put(`${this.$store.getters.serviceUrl}/vote/close`, id, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
+                },
+                params: {
+                    id: id
+                },
+            }).then(response => {
+                if (response.status === 200) {
+                    for (let index = 0; index < this.votes.length; index++) {
+                        if (this.votes[index].id === id) {
+                            this.votes[index].status = 2;
+                        }
+                    }
+                }
+            }).catch(e => {
+                if (e.request.response != "") {
+                   console.log(e.request)
+                }
+            });
+        }
+    }
 }
 </script>
 

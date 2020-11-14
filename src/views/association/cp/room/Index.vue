@@ -17,6 +17,8 @@
                         <div class="md:flex md:items-center md:justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                           <div class="flex-1 min-w-0">
                               <h1 class="text-2xl font-semibold text-gray-900">Rooms</h1>
+                              <Breadcrumb
+                                    :routes="routes" />
                           </div>
                           <div class="mt-4 flex md:mt-0 md:ml-4">
                             <span class="shadow-sm rounded-md">
@@ -56,6 +58,7 @@ import axios from 'axios';
 
 import Alert from '@/components/alert/Alert.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 import Rooms from '@/components/tables/Rooms.vue'
 import CreateRoom from '@/components/forms/create/Room.vue'
 
@@ -64,6 +67,7 @@ export default {
     components: {
         Alert,
         Sidebar,
+        Breadcrumb,
         Rooms,
         CreateRoom
     },
@@ -78,6 +82,12 @@ export default {
               name: ''
             },
             rooms: [],
+            routes: [
+                {
+                    name: 'Rooms',
+                    url: 'association.rooms'
+                },
+            ],
             createRoom: false,
             notification: {
                 success: false,
@@ -96,7 +106,7 @@ export default {
             axios.get(`${this.$store.getters.serviceUrl}/room/get`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.rooms = response.data.rooms
@@ -127,7 +137,7 @@ export default {
             axios.post(`${this.$store.getters.serviceUrl}/room/create`, room, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.fetchData();
@@ -154,7 +164,7 @@ export default {
             axios.delete(`${this.$store.getters.serviceUrl}/room/delete/` + id, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem("bearer")
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
                 this.fetchData();
