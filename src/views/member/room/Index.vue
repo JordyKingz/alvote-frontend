@@ -12,11 +12,66 @@
                 </div>
                 <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none" tabindex="0">
                     <div class="pt-2 pb-6 md:py-6">
-                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <h1 class="text-2xl font-semibold text-gray-900">Conference room</h1>
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                          <h1 class="text-2xl font-semibold text-gray-900">Conference room</h1>
                         </div>
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                            
+                            <div 
+                              v-for="(answer, key) in vote.answers"
+                              :key="key"
+                              class="mt-4">
+                                <div class="mt-4">
+                                  <h3 class="text-2xl font-semibold text-gray-900">{{ answer.answer }}</h3>
+                                </div>
+                                <div 
+                                  class="mt-4 flex items-center">
+                                    <input 
+                                      v-on:click="userVote(answer, 1)" 
+                                      name="voted"
+                                      type="radio" 
+                                      class="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"/>
+                                    <label for="push_email" class="ml-3">
+                                      <span class="block text-sm leading-5 font-medium text-gray-700">Yes</span>
+                                    </label>
+                                </div>
+                                <div 
+                                  class="mt-4 flex items-center">
+                                    <input 
+                                      v-on:click="openBox(key)" 
+                                      name="voted"
+                                      type="radio" 
+                                      class="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"/>
+                                      <label for="push_email" class="ml-3">
+                                        <span class="block text-sm leading-5 font-medium text-gray-700">Yes, if:</span>
+                                      </label>
+                                      <div :id="`${key}-open`" style="display: none" class="mt-4 flex items-center">
+                                        <div class="mt-4 flex rounded-md shadow-sm">
+                                          <textarea v-model="reason" rows="3" class="form-textarea mt-1 block w-full transition duration-150 ease-in-out sm:text-sm sm:leading-5" placeholder="you@example.com"></textarea>
+                                        </div>
+                                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                                          <span class="inline-flex rounded-md shadow-sm">
+                                            <button 
+                                              type="submit"
+                                              v-on:click="voteOnceIf(answer)" 
+                                              class="bg-indigo-600 border border-transparent rounded-md py-2 px-4 inline-flex justify-center text-sm leading-5 font-medium text-white hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+                                              Save
+                                            </button>
+                                          </span>
+                                        </div>
+                                      </div>
+                                </div>
+                                <div 
+                                  class="mt-4 flex items-center">
+                                    <input 
+                                      v-on:click="userVote(answer, 3)" 
+                                      name="voted"
+                                      type="radio" 
+                                      class="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"/>
+                                    <label for="push_email" class="ml-3">
+                                      <span class="block text-sm leading-5 font-medium text-gray-700">No</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </main>
@@ -39,6 +94,10 @@ export default {
             personalCode: this.$route.params.personalCode,
             room: this.$store.getters.room,
             roomCodes: [],
+            vote: {
+
+            },
+            reason: '',
             notification: {
                 success: false,
                 warning: false,
@@ -50,7 +109,6 @@ export default {
     },
     created() {
         // Check if session code is the same as the url parameter
-        console.log(sessionStorage.getItem('room.code'))
         if (sessionStorage.getItem('room.code') != this.roomCode || sessionStorage.getItem('personal.code') != this.personalCode) {
             this.notification.success = false;
             this.notification.danger = true;
@@ -58,32 +116,37 @@ export default {
             this.notification.message = "The codes has changed. You leaved the room.";
             this.$router.push({ name: 'member.room.join', params: { notification: this.notification}});
         }
-        // const roomCode = this.roomCode
-        // Echo.join(`memberJoined-${roomCode}`)
-        //   .here(roomCode => {
-        //       console.log(roomCode);
-        //       this.roomCode = roomCode;
-        //   })
-        //   .joining(roomCode => {
-        //       this.roomCodes.push(roomCode);
-        //       console.log(this.roomCodes);
-        //   })
-          // .leaving(user => {
-          //     this.users = this.users.filter(u => u.id != user.id);
-          // })
-          // .listen('ChatEvent',(event) => {
-          //     this.messages.push(event.chat);
-          // })
-          // .listenForWhisper('typing', user => {
-          //     this.activeUser = user;
-          //     if(this.typingTimer) {
-          //         clearTimeout(this.typingTimer);
-          //     }
-          //     this.typingTimer = setTimeout(() => {
-          //         this.activeUser = false;
-          //     }, 1000);
-          // })
     },
+    async mounted () {
+      await this.connectChannels();
+    },
+    methods: {
+        async connectChannels() {
+            const echo = new Echo({
+                broadcaster: 'pusher',
+                key: `${this.$store.getters.pusherKey}`,
+                cluster: 'eu',
+                encrypted: false,
+            });
+
+            // Open vote channel
+            echo.channel(`open`)
+                .listen(`VoteOpen`, (event) => {
+                  this.vote = event.vote;
+            });
+        },
+        userVote(answer, vote) {
+          if (vote != 2) {
+            console.log(answer, vote);
+          }
+        },
+        voteOnceIf(answer) {
+          console.log(answer, this.reason);
+        },
+        openBox(key) {
+          document.getElementById(`${key}-open`).style.display = "block";
+        }
+    }
 }
 </script>
 

@@ -267,22 +267,21 @@ export default {
         this.routes.push(route);
     },
     methods: {
-      async connectChannels() {
-        //   const token =  sessionStorage.getItem("alvote.bearer");
-          const echo = new Echo({
-              broadcaster: 'pusher',
-              key: `${this.$store.getters.pusherKey}`,
-              cluster: 'eu',
-              encrypted: false,
-          });
+        async connectChannels() {
+            const echo = new Echo({
+                broadcaster: 'pusher',
+                key: `${this.$store.getters.pusherKey}`,
+                cluster: 'eu',
+                encrypted: false,
+            });
 
-          // Member joined channel
-          echo.channel(`memberJoined`)
-              .listen(`MemberJoinedRoom`, (event) => {
-                this.dbRoom = event.room;
-          });
+            // Member joined channel
+            echo.channel(`memberJoined`)
+                .listen(`MemberJoinedRoom`, (event) => {
+                  this.dbRoom = event.room;
+            });
           
-          // Member voted channel
+            // Member voted channel
         },
         async fetchRoom() {
             await axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
@@ -298,7 +297,7 @@ export default {
                     this.notification.success = false;
                     this.notification.danger = true;
                     this.notification.title = "Request returned 404";
-                    this.notification.message = "No API call available: /api/v1/room/find/{id}";
+                    this.notification.message = "No API call available";
                 }
                 else if (e.request.response != "") {
                     const message = JSON.parse(e.request.response);
@@ -322,7 +321,7 @@ export default {
                     this.notification.success = false;
                     this.notification.danger = true;
                     this.notification.title = "Request returned 404";
-                    this.notification.message = "No API call available: /api/v1/room/find/{id}";
+                    this.notification.message = "No API call available";
                 }
                 else if (e.request.response != "") {
                     const message = JSON.parse(e.request.response);
