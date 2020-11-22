@@ -41,10 +41,13 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="px-4 py-4 sm:px-6" >
+                          {{ vote.answers }}
+                        </div>
                         <!-- <div v-for="(answer, key) in vote.answers" :key="key" class="px-4 py-4 sm:px-6" >
                             <div class="flex items-center justify-between">
                                 <div class="ml-2 flex-shrink-0 flex">
-                                    <BarChart :chartdata="chartdata" :options="options"/>
+                                    <BarChart :chartdata="answer.chartData" :options="options"/>
                                 </div>
                             </div>
                         </div> -->
@@ -70,11 +73,11 @@ export default {
         // BarChart
     },
     data: () => ({
-        chartdata: {
+        chartData: {
             labels: ['Nee', 'Ja, mits', 'Ja'],
             datasets: [
                 {
-                    label: 'Data One',
+                    label: '',
                     backgroundColor: ["#feb2b2", "#90cdf4", "#9ae6b4"],
                     data: [1, 5, 10, 0]
                 },

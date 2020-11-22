@@ -15,18 +15,18 @@
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                           <h1 class="text-2xl font-semibold text-gray-900">Conference room</h1>
                         </div>
-                        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                            <div 
-                              v-for="(answer, key) in vote.answers"
-                              :key="key"
-                              class="mt-4">
+                        <div 
+                          v-if="roomVote.answer" 
+                          class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                            <div class="mt-4">
                                 <div class="mt-4">
-                                  <h3 class="text-2xl font-semibold text-gray-900">{{ answer.answer }}</h3>
+                                  <h3 class="text-2xl font-semibold text-gray-900">{{ roomVote.answer }}</h3>
                                 </div>
                                 <div 
                                   class="mt-4 flex items-center">
                                     <input 
-                                      v-on:click="userVote(answer, 1)" 
+                                      v-model="userVote" 
+                                      value="1"
                                       name="voted"
                                       type="radio" 
                                       class="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"/>
@@ -37,33 +37,25 @@
                                 <div 
                                   class="mt-4 flex items-center">
                                     <input 
-                                      v-on:click="openBox(key)" 
-                                      name="voted"
+                                      v-on:click="openBox()" 
+                                      v-model="userVote" 
+                                      value="2"
                                       type="radio" 
                                       class="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"/>
                                       <label for="push_email" class="ml-3">
                                         <span class="block text-sm leading-5 font-medium text-gray-700">Yes, if:</span>
                                       </label>
-                                      <div :id="`${key}-open`" style="display: none" class="mt-4 flex items-center">
+                                      <div id="box-open" style="display: none" class="mt-4 flex items-center">
                                         <div class="mt-4 flex rounded-md shadow-sm">
                                           <textarea v-model="reason" rows="3" class="form-textarea mt-1 block w-full transition duration-150 ease-in-out sm:text-sm sm:leading-5" placeholder="you@example.com"></textarea>
-                                        </div>
-                                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                                          <span class="inline-flex rounded-md shadow-sm">
-                                            <button 
-                                              type="submit"
-                                              v-on:click="voteOnceIf(answer)" 
-                                              class="bg-indigo-600 border border-transparent rounded-md py-2 px-4 inline-flex justify-center text-sm leading-5 font-medium text-white hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
-                                              Save
-                                            </button>
-                                          </span>
                                         </div>
                                       </div>
                                 </div>
                                 <div 
                                   class="mt-4 flex items-center">
                                     <input 
-                                      v-on:click="userVote(answer, 3)" 
+                                      v-model="userVote" 
+                                      value="3"
                                       name="voted"
                                       type="radio" 
                                       class="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"/>
@@ -71,7 +63,25 @@
                                       <span class="block text-sm leading-5 font-medium text-gray-700">No</span>
                                     </label>
                                 </div>
+                                <div 
+                                  class="mt-4 flex items-center">
+                                    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                                      <span class="inline-flex rounded-md shadow-sm">
+                                        <button 
+                                          v-on:click="makeVote"
+                                          type="submit"
+                                          class="bg-blue-600 border border-transparent rounded-md py-2 px-4 inline-flex justify-center text-sm leading-5 font-medium text-white hover:bg-blue-500 focus:outline-none focus:border-blue-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+                                          Save
+                                        </button>
+                                      </span>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                        <div 
+                          v-else 
+                          class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                            Waiting for vote...
                         </div>
                     </div>
                 </main>
@@ -81,7 +91,7 @@
 </template>
 
 <script>
-// import axios from 'axios';
+import axios from 'axios';
 import Echo from "laravel-echo"
 
 export default {
@@ -94,9 +104,10 @@ export default {
             personalCode: this.$route.params.personalCode,
             room: this.$store.getters.room,
             roomCodes: [],
-            vote: {
-
-            },
+            vote: {},
+            roomVote: {},
+            voted: 0,
+            userVote: 0,
             reason: '',
             notification: {
                 success: false,
@@ -133,18 +144,49 @@ export default {
             echo.channel(`open`)
                 .listen(`VoteOpen`, (event) => {
                   this.vote = event.vote;
+
+                  this.roomVote = this.vote.answers[this.voted];
             });
         },
-        userVote(answer, vote) {
-          if (vote != 2) {
-            console.log(answer, vote);
+        makeVote() {
+          console.log(this.userVote);
+
+          if (this.userVote == 2 && this.reason == "") {
+            alert('Fill in the once if:');
+
+            return;
+          }
+
+          const dto = {
+            id: this.vote.id,
+            answerId: this.vote.answers[this.voted].id,
+            userVote: Number(this.userVote),
+            reason: this.reason
+          }
+
+          console.log(dto);
+
+          // make vote
+          try {
+            console.log('try');
+            axios
+              .post(`${this.$store.getters.serviceUrl}/member/vote`, dto)
+                .then(response => {
+                  if (response.status === 200) {
+                      this.voted++;
+                  }
+                })
+                .catch(e => {
+                  console.log('axios catch');
+                  console.log(e.request);
+                });
+          } catch (error) {
+            console.log('try catch');
+            console.log(error);
           }
         },
-        voteOnceIf(answer) {
-          console.log(answer, this.reason);
-        },
         openBox(key) {
-          document.getElementById(`${key}-open`).style.display = "block";
+          document.getElementById(`box-open`).style.display = "block";
         }
     }
 }

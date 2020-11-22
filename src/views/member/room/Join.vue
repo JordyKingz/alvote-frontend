@@ -71,7 +71,7 @@ export default {
     },
     methods: {
         joinRoom () {
-            axios.post(`${this.$store.getters.serviceUrl}/room/join`,  {
+            axios.post(`${this.$store.getters.serviceUrl}/member/room/join`,  {
                 roomCode: this.member.roomCode,
                 personalCode: this.member.personalCode
             }).then(response => {

@@ -255,9 +255,10 @@ export default {
         };
     },
     async mounted() {
-        await this.connectChannels();
         await this.fetchRoom();
-        this.fetchVotes();
+        await this.fetchVotes();
+        await this.connectChannels();
+
 
         const route = {
             name: this.dbRoom.name,
@@ -280,8 +281,19 @@ export default {
                 .listen(`MemberJoinedRoom`, (event) => {
                   this.dbRoom = event.room;
             });
-          
-            // Member voted channel
+
+            // MemberVoted
+            echo.channel(`voted`)
+              .listen(`MemberVoted`, (event) => {
+                console.log(event);
+                  for (let index = 0; index < this.votes.length; index++) {
+                      for (let i = 0; i < this.votes[index].answers.length; i++) {
+                        if (Number(this.votes[index].answers[i].id) === Number(event.answer_id)) {
+                          this.votes[index].answers[i] = event;
+                        }
+                      }
+                  }
+            });
         },
         async fetchRoom() {
             await axios.get(`${this.$store.getters.serviceUrl}/room/find/` + this.dbRoom.id, {
@@ -308,8 +320,8 @@ export default {
                 }
             });
         },
-        fetchVotes() {
-            axios.get(`${this.$store.getters.serviceUrl}/votes/room/` + this.dbRoom.id, {
+        async fetchVotes() {
+            await axios.get(`${this.$store.getters.serviceUrl}/votes/room/` + this.dbRoom.id, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
