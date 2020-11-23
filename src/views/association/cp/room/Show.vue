@@ -327,6 +327,7 @@ export default {
                     'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
+                console.log(response.data);
                 this.votes = response.data.votes;
             }).catch(e => {
                 if (e.request.status === 404 ) {
