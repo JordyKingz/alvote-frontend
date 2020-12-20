@@ -1,5 +1,5 @@
 <template>
-    <div id="rooms">
+    <div id="rooms" v-if="!isLoading">
         <div class="h-screen flex overflow-hidden bg-gray-100">
             <Sidebar :name="name"/>
             <div class="flex flex-col w-0 flex-1 overflow-hidden">
@@ -216,6 +216,7 @@ export default {
     },
     data() {
         return {
+            isLoading: false,
             name: sessionStorage.getItem('name'),
             email: sessionStorage.getItem('email'),
             dbRoom: {
@@ -236,6 +237,7 @@ export default {
             },
             //array: [],
             votes: [],
+            // Routes is used for Breadcrumbs
             routes: [
                 {
                     name: 'Rooms',
@@ -255,10 +257,10 @@ export default {
         };
     },
     async mounted() {
+        this.isLoading = true;
         await this.fetchRoom();
         await this.fetchVotes();
         await this.connectChannels();
-
 
         const route = {
             name: this.dbRoom.name,
@@ -266,6 +268,8 @@ export default {
         }
 
         this.routes.push(route);
+
+        this.isLoading = false;
     },
     methods: {
         async connectChannels() {
@@ -282,7 +286,10 @@ export default {
                   this.dbRoom = event.room;
             });
 
-            // MemberVoted
+            /* MemberVoted
+            * Add the graphData for the
+            * specific vote
+            */
             echo.channel(`voted`)
               .listen(`MemberVoted`, (event) => {
                 console.log(event);
@@ -327,8 +334,9 @@ export default {
                     'Authorization': 'Bearer ' + sessionStorage.getItem("alvote.bearer")
                 },
             }).then(response => {
-                console.log(response.data);
                 this.votes = response.data.votes;
+
+                this.calculateChartData();
             }).catch(e => {
                 if (e.request.status === 404 ) {
                     this.notification.success = false;
@@ -344,6 +352,44 @@ export default {
                     this.notification.message = message.message;
                 }
             });
+        },
+        calculateChartData() {
+          //  This need to liveUpdate when Votes are added
+          for (let index = 0; index < this.votes.length; index++) {
+            for (let ind = 0; ind < this.votes[index].answers.length; ind++) {
+                const chartData = {
+                    labels: ['Nee', 'Ja, mits', 'Ja'],
+                }
+                const memberVotes = this.votes[index].answers[ind].member_votes;
+
+                let agree = 0;
+                let onceIf = 0;
+                let disagree = 0;
+
+                for (let i = 0; i < memberVotes.length; i++) {
+                    if (Number(memberVotes[i].type) === 1) {
+                        agree++;
+                    } else if (Number(memberVotes[i].type) === 2) {
+                        onceIf++;
+                    } else if (Number(memberVotes[i].type) === 2) {
+                        disagree++;
+                    }
+                }
+
+                let graphLimit = 10;
+                if (memberVotes.length > 0) {
+                    graphLimit = memberVotes.length * 2;
+                } 
+
+                chartData.datasets = [{
+                    label: this.votes[index].answers[ind].answer,
+                    backgroundColor: ["#feb2b2", "#90cdf4", "#9ae6b4"],
+                    data: [disagree, onceIf, agree, graphLimit]
+                }]
+
+                this.votes[index].answers[ind].chartData = chartData;
+            }
+          }
         },
         createRoom() {
             const room = {
@@ -470,7 +516,8 @@ export default {
             });
         },
         toggleModal() {
-            this.createRoom = !this.createRoom;
+            // this.createRoom = !this.createRoom;
+            this.showCreateRoom = !this.showCreateRoom;
         },
         toggleInviteModal() {
             this.inviteMember = !this.inviteMember;

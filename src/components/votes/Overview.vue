@@ -41,16 +41,15 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="px-4 py-4 sm:px-6" >
-                          {{ vote.answers }}
-                        </div>
-                        <!-- <div v-for="(answer, key) in vote.answers" :key="key" class="px-4 py-4 sm:px-6" >
+                        
+                        <div v-for="(answer, key) in vote.answers" :key="key" class="px-4 py-4 sm:px-6" >
                             <div class="flex items-center justify-between">
                                 <div class="ml-2 flex-shrink-0 flex">
-                                    <BarChart :chartdata="answer.chartData" :options="options"/>
+                                    <BarChart :chartdata="answer.chartData" :options="options"/>  
+                                    <!-- answer.chartData / chartData -->
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
                     </a>
                 </li>
             </ul>
@@ -60,7 +59,7 @@
 
 <script>
 import axios from 'axios';
-// import BarChart from '@/components/votes/Chart.vue'
+import BarChart from '@/components/votes/Chart.vue'
 
 export default {
     name: 'component.votes.overview',
@@ -70,7 +69,7 @@ export default {
         voted: Number,
     },
     components: {
-        // BarChart
+        BarChart
     },
     data: () => ({
         chartData: {
@@ -85,7 +84,8 @@ export default {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            label: false,
         }
     }),
     methods: {
